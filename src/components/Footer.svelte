@@ -85,7 +85,7 @@
     </div>
 
     <div class="flex flex-col items-center text-xl font-normal">
-        <p class="font-semibold">Team 4</p>
+        <p class="font-semibold">Thành viên Team 3</p>
         <div class="flex max-w-[70%] flex-row flex-wrap items-center justify-center gap-x-3">
             <p class="min-w-fit">Tri Phương</p>
             <p class="min-w-fit">Ngọc Minh</p>
