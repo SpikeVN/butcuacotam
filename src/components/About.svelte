@@ -4,7 +4,7 @@
 
 <div class="flex w-full flex-col md:flex-row">
     <div
-        class="flex w-full flex-col gap-12 p-12 text-justify font-display text-6xl font-normal text-[#A08DC0] md:w-[50%]"
+        class="flex w-full flex-col gap-6 md:gap-12 p-12 text-justify font-display text-xl md:text-6xl font-normal text-[#A08DC0] md:w-[50%]"
     >
         <span
             ><i>Bụt của Cô Tấm</i> là một thử thách khoa học dữ liệu hàng năm. Dù bạn là học sinh THPT
@@ -12,7 +12,7 @@
             những thử thách này.</span
         >
 
-        <span class="text-justify text-3xl italic">
+        <span class="text-justify text-lg md:text-3xl italic">
             Nếu bạn hứng thú với những thử thách kiểu này, có thể bạn cũng sẽ muốn thử sức với DSTC,
             cuộc thi Data Science do CLB CTE tổ chức. <a href="/cte-va-dstc" class="underline"
                 >Tìm hiểu thêm</a

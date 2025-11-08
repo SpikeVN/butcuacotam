@@ -49,7 +49,7 @@
         </a>
     </div>
 
-    <div class="flex w-full flex-row items-center justify-center gap-24">
+    <div class="flex w-full flex-row items-center justify-center gap-12 md:gap-24">
         <div>
             <p
                 class="absolute hidden translate-x-[-110%] translate-y-[40%] text-right text-xl font-bold lg:block"
@@ -57,7 +57,7 @@
                 CLB KHOA HỌC CÔNG NGHỆ<br />
                 TRONG KINH TẾ VÀ KINH DOANH
             </p>
-            <img src={cte} class="h-24 w-auto" alt="logo cte" />
+            <img src={cte} class="h-12 md:h-24 w-auto" alt="logo cte" />
         </div>
         <div>
             <p
@@ -66,15 +66,21 @@
                 DỰ ÁN <i>BỤT CỦA CÔ TẤM</i><br />
                 TEAM 3, TUYỂN THÀNH VIÊN VÒNG 4
             </p>
-            <img src={logoLarge} class="h-24 w-auto" alt="logo cte" />
+            <img src={logoLarge} class="h-12 md:h-24 w-auto" alt="logo cte" />
         </div>
     </div>
 
     <div class="flex flex-col items-center text-xl font-normal">
         <p class="font-semibold">Special Thanks</p>
-        <div class="flex flex-row gap-3">
+        <div class="flex max-w-[70%] flex-row flex-wrap items-center justify-center gap-x-3">
             <p>Anh Sỹ Bách</p>
             <p>Chị Bảo Anh</p>
+            <p>Anh Quang Đức</p>
+            <p>Chị Huyền Linh</p>
+            <p>Chị Huyền Anh</p>
+            <p>Chị Ngọc Minh</p>
+            <p>Anh Anh Dũng</p>
+            <p>Anh Công Minh</p>
         </div>
     </div>
 
