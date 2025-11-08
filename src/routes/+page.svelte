@@ -13,7 +13,7 @@
 <Navbar />
 <!-- </div> -->
 
-<main class="z-10">
+<main class="z-10 w-full">
     <Mural />
     <About />
     <Rewards />

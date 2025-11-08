@@ -1,15 +1,17 @@
 <script lang="ts">
-    import { page } from '$app/state';
+    import { page } from "$app/state";
 
     import logoLarge from "$lib/assets/logo-large.png";
 </script>
 
-<div class="flex h-screen w-full flex-row items-center justify-center gap-12">
-    <img class="w-[20%]" src={logoLarge} alt="project logo" />
-    <div class="flex flex-col items-start gap-6">
-        <div class="flex flex-col items-start gap-1">
-            <h1 class="text-5xl">{page.status} {page.error?.message}</h1>
-            <p class="text-xl">{page.status == 404 ? "Trang bạn cần tìm không tồn tại" : "Đã có lỗi xảy ra"}.</p>
+<div class="flex h-screen w-full flex-col items-center justify-center gap-12 md:flex-row">
+    <img class="w-[50%] md:w-[20%]" src={logoLarge} alt="project logo" />
+    <div class="flex flex-col items-center gap-3 md:gap-6 md:items-start">
+        <div class="flex flex-col md:items-start items-center gap-1">
+            <h1 class="text-3xl md:text-5xl">{page.status} {page.error?.message}</h1>
+            <p class="text-lg md:text-xl">
+                {page.status == 404 ? "Trang bạn cần tìm không tồn tại" : "Đã có lỗi xảy ra"}.
+            </p>
         </div>
         <a href="/" class="btn"
             >Quay về trang chủ.

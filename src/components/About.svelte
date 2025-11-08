@@ -4,7 +4,7 @@
 
 <div class="flex w-full flex-col md:flex-row">
     <div
-        class="flex w-full flex-col gap-6 md:gap-12 p-12 text-justify font-display text-xl md:text-6xl font-normal text-[#A08DC0] md:w-[50%]"
+        class="flex w-full flex-col gap-6 p-12 text-justify font-display text-xl font-normal text-[#A08DC0] md:w-[50%] md:gap-12 md:text-6xl"
     >
         <span
             ><i>Bụt của Cô Tấm</i> là một thử thách khoa học dữ liệu hàng năm. Dù bạn là học sinh THPT
@@ -12,7 +12,7 @@
             những thử thách này.</span
         >
 
-        <span class="text-justify text-lg md:text-3xl italic">
+        <span class="text-justify text-lg italic md:text-3xl">
             Nếu bạn hứng thú với những thử thách kiểu này, có thể bạn cũng sẽ muốn thử sức với DSTC,
             cuộc thi Data Science do CLB CTE tổ chức. <a href="/cte-va-dstc" class="underline"
                 >Tìm hiểu thêm</a
@@ -20,7 +20,7 @@
         </span>
     </div>
     <div
-        class="bettertext prose-lg w-full border-t border-t-accent p-12 text-justify font-normal md:w-[50%] md:border-t-0 md:border-l md:border-l-accent prose-headings:text-fg prose-p:font-medium prose-p:text-fg2 prose-li:font-medium prose-li:text-fg2"
+        class="bettertext prose-lg w-full border-t border-t-accent p-12 text-justify font-normal prose-invert md:w-[50%] md:border-t-0 md:border-l md:border-l-accent prose-headings:text-fg prose-p:font-medium prose-p:text-fg2 prose-li:font-medium prose-li:text-fg2"
     >
         <h1 class="text-5xl" id="thele">Tham gia</h1>
         <p>

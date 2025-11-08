@@ -22,7 +22,7 @@
 
     <a href="/debai" role="button" class="btn">Bắt đầu <ArrowRightIcon /></a>
 
-    <div class="absolute bottom-12 z-0 flex flex-col items-center gap-2">
+    <div class="absolute bottom-6 md:bottom-12 z-0 flex flex-col items-center gap-2">
         <svg
             width="22"
             height="33"

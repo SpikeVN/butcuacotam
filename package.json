@@ -31,6 +31,10 @@
         "vite": "^7.1.10"
     },
     "dependencies": {
-        "@lucide/svelte": "^0.553.0"
+        "@lucide/svelte": "^0.553.0",
+        "@svelte-put/qr": "^2.1.1",
+        "blakejs": "^1.2.1",
+        "firebase": "^12.5.0",
+        "svelte-exmarkdown": "^5.0.2"
     }
 }

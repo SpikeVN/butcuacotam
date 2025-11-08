@@ -1,0 +1,270 @@
+<script lang="ts">
+    import Navbar from "../../components/Navbar.svelte";
+    import { db } from "$lib/database";
+    import {
+        generateToken,
+        computeHash,
+        validateToken,
+        toAlnumToken,
+        toTextToken
+    } from "$lib/crypto";
+    import { collection, doc, getDoc, setDoc } from "firebase/firestore/lite";
+    import { onMount } from "svelte";
+    import { qr } from "@svelte-put/qr/svg";
+    import Competition from "../../components/Competition.svelte";
+    import Modal from "../../components/Modal.svelte";
+    import { page } from "$app/state";
+    import logo from "$lib/assets/logo-large.png";
+
+    let challenge: {
+        title: string;
+        id: number;
+        parts: {
+            context: string;
+            description: string;
+            hint?: string;
+            requires: { [key: string]: "number" | "file" | "text" };
+        }[];
+        materials: { json?: string; xlsx?: string; csv?: string; sb3?: string };
+    } = {
+        id: 0,
+        title: "Cửa thứ 1. Cô Tấm, gạo, và cám",
+        parts: [
+            {
+                context: `Ngày xửa ngày xưa, có hai chị em cùng cha khác mẹ tên là Tấm và Cám. Mẹ Tấm mất sớm, còn cha Tấm cưới thêm mẹ Cám, cha Tấm vô cùng hết mực yêu thương cô, nhưng rồi ông bệnh nặng, không lâu sau đó thì qua đời.
+
+Tấm phải sống chung với dì ghẻ là mẹ của Cám. Bà mẹ ghẻ là người cay nghiệt, hàng ngày bắt Tấm phải làm hết mọi công việc trong nhà còn Cám thì ngược lại được lêu lổng vui chơi tối ngày.
+
+Ít lâu sau CLB CTE tổ chức cuộc thi Data Science Talent Competition, mọi người ai nấy nô nức tham gia. Mẹ con Cám chuẩn bị đi từ rất sớm, Tấm xin mẹ cho đi xem cùng thì dì ghẻ trộn dữ liệu gạo – thóc của các vùng trong 6 tháng cuối năm 2025 rồi bắt Tấm ngồi xử lý, khi nào xử lý xong thì mới được đi DSTC. Nhìn bảng dữ liệu dài 100 dòng, toàn số và ký hiệu rối tung, Tấm lại khóc nức nở.
+
+Đúng lúc ấy, ông Bụt xuất hiện, phất tay một cái và gọi con chim thông minh tới giúp. Chim đeo tai nghe Bluetooth, vừa kêu “chip chip” vừa gõ phím thành thạo:
+
+> Để em xử lý data cho chị, 3 phút là xong!
+
+Bạn sẽ là chú chim ấy, nhiệm vụ của bạn là giúp Tấm vượt qua được những thử thách của mụ dì ghẻ để đến được DSTC 2026 nhé!
+`,
+                description: `Hãy nhận gạo và thóc mà dì ghẻ giao cho cô Tấm được cho ở dưới đây để giúp Tấm.
+
+Bạn sẽ phải:
+- Chuẩn hóa định dạng cột 
+- Ngày thu hoạch về dạng yyyy-MM-dd. 
+- Chuẩn hóa dữ liệu văn bản trong các cột: Khu vực, Tỉnh/Thành phố, Loại hạt. 
+- Quy đổi giá USD về VND theo tỉ giá 1 USD = 25,000 VND. Xử lý các giá trị sai định dạng (ví dụ: ??, NA, USD20000, -100, #N/A …). 
+- Loại bỏ các dòng trùng lặp (nếu có). Kiểm tra tổng số dòng sau khi làm sạch và ghi lại kết quả. 
+`,
+                hint: "Bạn có thể sử dụng các hàm `SUBSTITUTE`, `VALUE`, `TEXT`, `TRIM` hoặc tính năng Find & Replace, Remove Duplicates.",
+                requires: { "Dữ liệu đã làm sạch": "file" }
+            },
+            {
+                context:
+                    "Với sự trợ giúp của những chú chim, Tấm đã nhanh chóng vượt qua được thử thách của mụ dì ghẻ. Nhặt lại quai hàm từ dưới đất lên (chắc tại do vừa rơi xuống) và uốn lại miệng từ chữ O thành dấu `(`. Mụ ta dù biết Tấm đã làm xong, vẫn đòi Tấm cho mụ xem biểu đồ, chứ không xem dữ liệu đã được làm sạch của Tấm. ",
+                description: `Hãy sử dụng dữ liệu đã được làm sạch từ phần trước của bạn để:
+- Tạo PivotTable tổng hợp Sản lượng (kg) theo từng Tỉnh/Thành phố. . 
+- Tạo biểu đồ tròn (Pie Chart) thể hiện tỷ lệ sản lượng theo khu vực (Miền Bắc, Miền Trung, Miền Nam). 
+- Thêm nhận xét ngắn (3–5 dòng) về xu hướng sản lượng giữa các vùng.
+`,
+                hint: "Dùng Insert → PivotChart để tạo biểu đồ. Kiểm tra kỹ dữ liệu đầu vào đã sạch trước khi lập bảng.",
+                requires: { "Sheet Excel có những biểu đồ và nhận xét yêu cầu": "file" }
+            },
+            {
+                context:
+                    "Mụ dì ghẻ tí nữa ngất xỉu khi thấy những thử thách mà mụ nghĩ không thể nào vượt qua được, chẳng mấy chốc được Tấm làm xong. Bất lực, mụ lại đòi Tấm tính toán với dữ liệu đó.",
+                description: `Bạn cần phải:
+- Tính tỷ lệ sản lượng của các tỉnh: Kiên Giang
+- Tổng thành tiền của Gạo ST25
+- Tổng khối lượng của Hà Nội
+- Tổng thành tiền của toàn bộ bảng`,
+                hint: undefined,
+                requires: {
+                    "Tỉ lệ sản lượng của các tỉnh Kiên Giang": "number",
+                    "Tổng thành tiền của gạo ST25": "number",
+                    "Tổng khối lượng của Hà Nội": "number",
+                    "Tổng thành tiền của toàn bộ bảng": "number"
+                }
+            }
+        ],
+        materials: {
+            xlsx: "/static/debai1.xlsx"
+        }
+    };
+
+    let email = $state("");
+    let token = $state("");
+    let tokenText = $state("");
+    let nickname = $state("");
+    let progress: {
+        section: number;
+        task: number;
+    } = $state({
+        section: 0,
+        task: 0
+    });
+    let error = $state("");
+    let loaded = $state(false);
+
+    let showInfoCard = $state(false);
+
+    const usersRef = collection(db, "users");
+
+    onMount(async () => {
+        let maybetoken = "";
+        if (page.url.searchParams.has("token")) {
+            maybetoken = page.url.searchParams.get("token")!;
+            window.history.pushState("", "", window.location.origin + window.location.pathname);
+        } else {
+            maybetoken = window.localStorage.getItem("token")!;
+        }
+        nickname = window.localStorage.getItem("nickname")!;
+        progress = JSON.parse(window.localStorage.getItem("progress")!);
+        if (maybetoken === null) {
+            token = "";
+        } else {
+            token = maybetoken;
+        }
+        loaded = true;
+        if (import.meta.env.PROD) {
+            if (await validateToken(token)) {
+                let info = await getDoc(doc(usersRef, token));
+                window.localStorage.setItem("nickname", info.data()?.nickname);
+                window.localStorage.setItem("progress", JSON.stringify(info.data()?.progress));
+                nickname = info.data()?.nickname;
+                progress = info.data()?.progress;
+            } else {
+                window.localStorage.removeItem("token");
+                window.localStorage.removeItem("nickname");
+                window.localStorage.removeItem("progress");
+            }
+        }
+    });
+</script>
+
+<Navbar />
+{#if token !== "" || !loaded}
+    <div class="-z-10 opacity-0">
+        <Navbar realnav={false} />
+    </div>
+{/if}
+
+<Modal bind:showModal={showInfoCard}>
+    <div class="flex flex-col gap-3">
+        <h1 class="text-3xl">Thẻ thông tin của bạn</h1>
+        <p>
+            Bạn sẽ không cần xác minh danh tính lại trên trình duyệt này. Tuy nhiên, nếu bạn sử dụng
+            thiết bị khác, bạn sẽ cần thông tin này để đăng nhập.
+        </p>
+        <div class="flex flex-row items-center gap-3">
+            <svg
+                class="w-[50%]"
+                use:qr={{
+                    data: `https://butcuacotam.falcolabs.org/debai?token=${token}`,
+                    logo: logo,
+                    shape: "square"
+                }}
+            />
+            <div class="flex flex-col gap-3">
+                <p>Quét mã bên hoặc nhập thần chú sau để đăng nhập:</p>
+                <code>{toTextToken(token)}</code>
+            </div>
+        </div>
+        <p>Đừng chia sẻ thần chú hay mã QR cho bất kỳ ai ngoài BTC.</p>
+
+        <p>
+            Bạn nên chụp màn hình tấm thẻ này. Ban Tổ chức có thể sẽ yêu cầu bạn cung cấp thần chú
+            khi trao giải. Mọi thắc mắc liên hệ BTC tại support@butcuacotam.cte.vn.
+        </p>
+        <br />
+    </div>
+</Modal>
+
+<main class="flex w-full min-w-screen flex-row">
+    {#if token === ""}
+        {#if !loaded}
+            <br /><br />
+            <p class="w-full text-center">Đang tải...</p>
+        {:else}
+            <div class="flex h-screen w-full min-w-screen flex-col items-center justify-center">
+                <h2 class="text-2xl">Nếu bạn lần đầu tới đây</h2>
+                <br />
+                <form
+                    class="flex flex-col"
+                    onsubmit={async () => {
+                        let toktuple = generateToken();
+                        await setDoc(doc(usersRef, toktuple.hash), {
+                            email: email,
+                            nickname: nickname,
+                            progress: {
+                                section: 0,
+                                task: 0
+                            }
+                        });
+                        token = toktuple.tokenAlnum;
+                        window.localStorage.setItem("token", toktuple.tokenAlnum);
+                        window.localStorage.setItem("nickname", nickname);
+                        window.localStorage.setItem(
+                            "progress",
+                            JSON.stringify({
+                                section: 0,
+                                task: 0
+                            })
+                        );
+                        showInfoCard = true;
+                    }}
+                >
+                    <input
+                        placeholder="Email của bạn"
+                        class="border-accent bg-bg outline-none"
+                        type="email"
+                        bind:value={email}
+                    />
+                    <input
+                        placeholder="Nickname bạn muốn"
+                        class="depth border-accent bg-bg outline-none"
+                        type="text"
+                        bind:value={nickname}
+                    />
+                    <button type="submit" class="btn w-full">Tiếp tục</button>
+                </form>
+                <br /><br />
+                <h2 class="text-2xl">hoặc nếu bạn cần làm tiếp</h2>
+                <br />
+                <div class="flex flex-row">
+                    <input
+                        placeholder="Nhập Thần chú của bạn"
+                        class="depth border-accent bg-bg outline-none"
+                        type="text"
+                        bind:value={tokenText}
+                    />
+                    <button
+                        class="btn"
+                        onclick={async () => {
+                            let alnum = toAlnumToken(tokenText.toLocaleUpperCase());
+                            if (await validateToken(alnum)) {
+                                let info = await getDoc(doc(usersRef, alnum));
+                                window.localStorage.setItem("token", computeHash(alnum));
+                                window.localStorage.setItem("nickname", info.data()?.nickname);
+                                window.localStorage.setItem(
+                                    "progress",
+                                    JSON.stringify(info.data()?.progress)
+                                );
+                                window.location.reload();
+                            } else {
+                                error = "Thần chú sai. Liên hệ BTC nếu bạn cần hỗ trợ.";
+                            }
+                        }}>Gửi</button
+                    >
+                </div>
+                <p class="max-w-[70%] text-center text-red-400">{error}</p>
+            </div>
+        {/if}
+    {:else}
+        <Competition
+            {token}
+            {nickname}
+            {progress}
+            {challenge}
+            triggerCard={() => {
+                showInfoCard = true;
+            }}
+        />
+    {/if}
+</main>
