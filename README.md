@@ -1,0 +1,43 @@
+# Bụt của Cô Tấm
+
+![banner](/static/banner.png)
+
+_Bụt của Cô Tấm_ là một thử thách khoa học dữ liệu hàng năm. Dù bạn là học sinh THPT hay đã là sinh viên; đã có kinh nghiệm với Data Science hay là lính mới; bạn đều có thể thửsức với những thử thách này.
+
+## Thể lệ
+
+Bạn không cần đăng ký tài khoản hay biết một ngôn ngữ lập trình để thử sức với những thử thách này.
+
+Các bước tham gia:
+
+- Bạn bấm vào nút Đề bài ở dưới mục này, và đọc đề bài. Chúng mình sẽ để lại cho bạn một ví dụ nho nhỏ để bạn hiểu đề bài hơn.
+- Bạn tải đề bài xuống theo định dạng mà bạn cần. Chúng mình sẽ cung cấp đề bài theo dạng .json, .csv, .xlsx, và .sb3.
+
+- Bạn làm theo yêu cầu đề bài và nhập đáp án vào ô. Nếu câu trả lời của bạn đúng, phần tiếp theo của câu hỏi sẽ được mở ra.
+
+Chúc bạn may mắn!
+
+## Cơ cấu giải thưởng
+
+### Dành cho những bạn mạnh dạn tham gia
+
+- Lời mời tham gia DSTC mà không cần tham gia vòng đơn;
+- Certificate điện tử được chúng mình gửi về email của bạn.
+
+### Nếu bạn nằm trong top 5, bạn sẽ nhận được
+
+- Lời mời tham gia DSTC mà không cần tham gia vòng Đánh giá năng lực;
+- Nhận được certificate chứng nhận từ CLB CTE;
+- Được vinh danh trên website và page của CLB.
+
+## Về CTE
+
+**Câu lạc bộ Khoa học Công nghệ trong Kinh tế và Kinh doanh trường Đại học Ngoại thương** (Club of Technology in Economics - CTE FTU) là câu lạc bộ trực thuộc Đoàn TNCS Hồ Chí Minh trường Đại học Ngoại thương, được thành lập ngày 10/8/2022. dưới sự bảo trợ chuyên môn của Khoa Công nghệ và Khoa học dữ liệu (FTDS).
+
+## Về DSTC
+
+**Data Science Talent Competition – Tìm kiếm tài năng Khoa học Dữ liệu** là một sân chơi học thuật quy mô toàn quốc do Câu lạc bộ Khoa học công nghệ trong Kinh tế và Kinh doanh – CTE FTU tổ chức, dành cho học sinh THPT và sinh viên đam mê công nghệ và kinh tế.
+
+## Giấy phép
+
+Dự án này được đặt dưới giấy phép AGPL-3.
