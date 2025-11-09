@@ -272,7 +272,7 @@ Bạn sẽ phải:
                 </p>
                 <div class="flex flex-row items-center gap-3">
                     <svg
-                        class="w-[50%]"
+                        class="w-40"
                         use:qr={{
                             data: `https://butcuacotam.falcolabs.org/debai?token=${tokenAlphanumeric}`,
                             logo: logo,
