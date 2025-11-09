@@ -1,6 +1,53 @@
 <script lang="ts">
+    import { page } from "$app/state";
     import cte from "$lib/assets/cte.svg";
     import logoLarge from "$lib/assets/logo-large.png";
+    import { onMount } from "svelte";
+
+    // @ts-ignore
+    let disappearHookElement: HTMLParagraphElement = $state();
+    let suckhoe = $state(false);
+    onMount(() => {
+        if (
+            page.url.searchParams.has(
+                "Minh_chao_moi_nguoi_a_Minh_rat_vui_khi_duoc_dong_hanh_voi_team_den_thoi_diem_hien_tai_nhung_vi_ly_do_suc_khoe_ca_nhan_nen_minh_xin_phep_duoc_tam_dung_vong_4_tai_day_a_Em_cung_xin_cam_on_cac_anh_chi_da_cho_em_co_hoi_de_duoc_vao_den_vong_nay_Minh_chuc_de_an_cua_nhom_se_thanh_cong_tam_biet_moi_nguoi_a"
+            )
+        ) {
+            suckhoe = true;
+            const animatedElements = document.querySelectorAll(".disappear");
+            const observerOptions = {
+                root: null, // relative to the viewport
+                rootMargin: "0px",
+                threshold: 0.5 // trigger when 50% of the element is visible
+            };
+            const observerCallback = (
+                entries: IntersectionObserverEntry[],
+                observer: IntersectionObserver
+            ) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add("disappear-active");
+                            // Optionally, stop observing after the animation plays once
+                            setTimeout(() => {
+                                entry.target.classList.add("hidden");
+                            }, 5000);
+                            observer.unobserve(entry.target);
+                        }, 1000);
+                    } else {
+                        // Optionally, remove the class to allow re-animation on re-entering
+                        // entry.target.classList.remove('is-visible');
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+            animatedElements.forEach((element) => {
+                observer.observe(element);
+            });
+        }
+    });
 </script>
 
 <div class="flex w-full flex-col items-center gap-12 border-t border-t-accent p-6">
@@ -57,7 +104,7 @@
                 CLB KHOA HỌC CÔNG NGHỆ<br />
                 TRONG KINH TẾ VÀ KINH DOANH
             </p>
-            <img src={cte} class="h-12 md:h-24 w-auto" alt="logo cte" />
+            <img src={cte} class="h-12 w-auto md:h-24" alt="logo cte" />
         </div>
         <div>
             <p
@@ -66,7 +113,7 @@
                 DỰ ÁN <i>BỤT CỦA CÔ TẤM</i><br />
                 TEAM 3, TUYỂN THÀNH VIÊN VÒNG 4
             </p>
-            <img src={logoLarge} class="h-12 md:h-24 w-auto" alt="logo cte" />
+            <img src={logoLarge} class="h-12 w-auto md:h-24" alt="logo cte" />
         </div>
     </div>
 
@@ -81,11 +128,13 @@
             <p>Chị Ngọc Minh</p>
             <p>Anh Anh Dũng</p>
             <p>Anh Công Minh</p>
+            <p>Chị Vân Chi</p>
+            <p>Anh Đức Phúc</p>
         </div>
     </div>
 
     <div class="flex flex-col items-center text-xl font-normal">
-        <p class="font-semibold">Thành viên Team 3</p>
+        <p class="font-semibold" bind:this={disappearHookElement}>Thành viên Team 3</p>
         <div class="flex max-w-[70%] flex-row flex-wrap items-center justify-center gap-x-3">
             <p class="min-w-fit">Tri Phương</p>
             <p class="min-w-fit">Ngọc Minh</p>
@@ -94,8 +143,8 @@
             <p class="min-w-fit">Duy Hải</p>
             <p class="min-w-fit">Dương Trung</p>
             <p class="min-w-fit">Trường Anh</p>
-            <!-- <p class="min-w-fit">Huyền My</p> -->
-            <!-- <p class="min-w-fit">Huyền My</p> -->
+            <p class="disappear min-w-fit" class:hidden={!suckhoe}>Huyền My</p>
+            <p class="disappear min-w-fit" class:hidden={!suckhoe}>Minh Khang</p>
             <!-- <p class="min-w-fit">Huyền My</p> -->
             <!-- <p class="min-w-fit">Huyền My</p> -->
         </div>

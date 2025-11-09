@@ -105,6 +105,15 @@ a:hover {
 
 }
 
+.disappear {
+    transition: ease 10s;
+    filter: blur(0px);
+}
+
+.disappear-active {
+    filter: blur(100px);
+}
+
 code {
     font-family: var(--font-code);
 }
