@@ -74,7 +74,7 @@
             {/each}
         </div>
         <div
-            class="prose flex min-w-screen flex-col border-t border-t-accent p-6 prose-invert sm:p-12 lg:min-w-0"
+            class="prose flex min-w-screen flex-col border-t border-t-accent lg:border-t-0 lg:border-l lg:border-l-accent p-6 prose-invert sm:p-12 lg:min-w-0"
         >
             <h1>Chim sẻ</h1>
             <form

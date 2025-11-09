@@ -15,6 +15,7 @@
     import Modal from "../../components/Modal.svelte";
     import { page } from "$app/state";
     import logo from "$lib/assets/logo-large.png";
+    import Footer from "../../components/Footer.svelte";
 
     let challenge: {
         title: string;
@@ -198,6 +199,10 @@ Bạn sẽ phải:
                             }
                         });
                         token = toktuple.tokenAlnum;
+                        progress = {
+                            section: 0,
+                            task: 0
+                        };
                         window.localStorage.setItem("token", toktuple.tokenAlnum);
                         window.localStorage.setItem("nickname", nickname);
                         window.localStorage.setItem(
@@ -268,3 +273,11 @@ Bạn sẽ phải:
         />
     {/if}
 </main>
+
+{#if token === ""}
+    <br />
+{:else}
+    <footer>
+        <Footer />
+    </footer>
+{/if}

@@ -10,7 +10,7 @@
     class:top-0={realnav}
     class:right-0={realnav}
     class:left-0={realnav}
-    class="nav noise ease z-10 container flex min-w-full flex-col justify-between gap-6 border-b border-b-accent p-6 sm:px-12 py-6 backdrop-blur-2xl duration-100 lg:flex-row lg:items-center lg:gap-12"
+    class="nav noise ease z-10 container flex min-w-full flex-col justify-between gap-6 border-b border-b-accent p-6 py-6 backdrop-blur-2xl duration-100 sm:px-12 lg:flex-row lg:items-center lg:gap-12"
 >
     <div class="flex w-full items-center justify-between lg:w-fit">
         <a href="/" aria-label="Homepage">
@@ -47,9 +47,13 @@
 
     <div class="hidden flex-row items-center gap-12 lg:flex">
         <a class="min-w-fit hover:underline" href="/debai">Đề bài</a>
-        <a class="min-w-fit hover:underline" href="/chat">Chatbot</a>
+        <a
+            class="min-w-fit hover:underline"
+            href="https://gemini.google.com/gem/1uorw5s-PgZrRkaPgtoTXb9pbQiDngmbp?usp=sharing"
+            >Chatbot</a
+        >
         <a class="min-w-fit hover:underline" href="#thele">Thể lệ</a>
-        <a class="min-w-fit hover:underline" href="/chat">Về CTE & DSTC</a>
+        <a class="min-w-fit hover:underline" href="/cte-va-dstc">Về CTE & DSTC</a>
         <a href="/" class="btn flex min-w-fit flex-row items-center gap-1.5 px-4 py-2"
             >Đăng ký DSTC <ExternalLinkIcon />
         </a>
@@ -60,9 +64,13 @@
         class="flex w-full flex-row flex-wrap items-center justify-center gap-6 lg:hidden"
     >
         <a class="min-w-fit hover:underline" href="/debai">Đề bài</a>
-        <a class="min-w-fit hover:underline" href="/chat">Chatbot</a>
+        <a
+            class="min-w-fit hover:underline"
+            href="https://gemini.google.com/gem/1uorw5s-PgZrRkaPgtoTXb9pbQiDngmbp?usp=sharing"
+            >Chatbot</a
+        >
         <a class="min-w-fit hover:underline" href="#thele">Thể lệ</a>
-        <a class="min-w-fit hover:underline" href="/chat">Về CTE & DSTC</a>
+        <a class="min-w-fit hover:underline" href="/cte-va-dstc">Về CTE & DSTC</a>
         <a href="/" class="btn flex min-w-fit flex-row items-center gap-1.5 px-4 py-2"
             >Đăng ký DSTC <ExternalLinkIcon />
         </a>
