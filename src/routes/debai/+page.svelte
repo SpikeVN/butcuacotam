@@ -1,14 +1,8 @@
 <script lang="ts">
     import Navbar from "../../components/Navbar.svelte";
     import { db } from "$lib/database";
-    import {
-        generateToken,
-        computeHash,
-        validateToken,
-        toAlnumToken,
-        toTextToken
-    } from "$lib/crypto";
-    import { collection, doc, getDoc, setDoc } from "firebase/firestore/lite";
+    import { generateToken, computeHash, toAlnumToken, toTextToken, getIfExist } from "$lib/crypto";
+    import { collection, doc, setDoc } from "firebase/firestore/lite";
     import { onMount } from "svelte";
     import { qr } from "@svelte-put/qr/svg";
     import Competition from "../../components/Competition.svelte";
@@ -16,6 +10,7 @@
     import { page } from "$app/state";
     import logo from "$lib/assets/logo-large.png";
     import Footer from "../../components/Footer.svelte";
+    import { ArrowRightIcon } from "@lucide/svelte";
 
     let challenge: {
         title: string;
@@ -32,13 +27,11 @@
         title: "Cửa thứ 1. Cô Tấm, gạo, và cám",
         parts: [
             {
-                context: `Ngày xửa ngày xưa, có hai chị em cùng cha khác mẹ tên là Tấm và Cám. Mẹ Tấm mất sớm, còn cha Tấm cưới thêm mẹ Cám, cha Tấm vô cùng hết mực yêu thương cô, nhưng rồi ông bệnh nặng, không lâu sau đó thì qua đời.
-
-Tấm phải sống chung với dì ghẻ là mẹ của Cám. Bà mẹ ghẻ là người cay nghiệt, hàng ngày bắt Tấm phải làm hết mọi công việc trong nhà còn Cám thì ngược lại được lêu lổng vui chơi tối ngày.
+                context: `Ngày xửa ngày xưa, có hai chị em cùng cha khác mẹ tên là Tấm và Cám. Tấm phải sống chung với dì ghẻ là mẹ của Cám. Bà mẹ ghẻ là người cay nghiệt, hàng ngày bắt Tấm phải làm hết mọi công việc trong nhà còn Cám thì ngược lại được lêu lổng vui chơi tối ngày.
 
 Ít lâu sau CLB CTE tổ chức cuộc thi Data Science Talent Competition, mọi người ai nấy nô nức tham gia. Mẹ con Cám chuẩn bị đi từ rất sớm, Tấm xin mẹ cho đi xem cùng thì dì ghẻ trộn dữ liệu gạo – thóc của các vùng trong 6 tháng cuối năm 2025 rồi bắt Tấm ngồi xử lý, khi nào xử lý xong thì mới được đi DSTC. Nhìn bảng dữ liệu dài 100 dòng, toàn số và ký hiệu rối tung, Tấm lại khóc nức nở.
 
-Đúng lúc ấy, ông Bụt xuất hiện, phất tay một cái và gọi con chim thông minh tới giúp. Chim đeo tai nghe Bluetooth, vừa kêu “chip chip” vừa gõ phím thành thạo:
+Đúng lúc ấy, ông Bụt xuất hiện, phất tay một cái và gọi con chim thông minh tới giúp. Chim đeo tai nghe Bluetooth, vừa kêu "chíp chíp" vừa gõ phím thành thạo:
 
 > Để em xử lý data cho chị, 3 phút là xong!
 
@@ -90,7 +83,8 @@ Bạn sẽ phải:
     };
 
     let email = $state("");
-    let token = $state("");
+    let tokenHashed = $state("");
+    let tokenAlphanumeric = $state("");
     let tokenText = $state("");
     let nickname = $state("");
     let progress: {
@@ -103,181 +97,222 @@ Bạn sẽ phải:
     let error = $state("");
     let loaded = $state(false);
 
-    let showInfoCard = $state(false);
+    let acknowledged = $state(true);
 
     const usersRef = collection(db, "users");
 
     onMount(async () => {
-        let maybetoken = "";
+        let maybetokenHashed = "";
         if (page.url.searchParams.has("token")) {
-            maybetoken = page.url.searchParams.get("token")!;
+            maybetokenHashed = page.url.searchParams.get("token")!;
             window.history.pushState("", "", window.location.origin + window.location.pathname);
         } else {
-            maybetoken = window.localStorage.getItem("token")!;
+            maybetokenHashed = window.localStorage.getItem("tokenHashed")!;
         }
         nickname = window.localStorage.getItem("nickname")!;
-        progress = JSON.parse(window.localStorage.getItem("progress")!);
-        if (maybetoken === null) {
-            token = "";
+        let prog = window.localStorage.getItem("progress")!;
+        if (prog == "undefined") {
+            progress = {
+                task: 0,
+                section: 0
+            };
         } else {
-            token = maybetoken;
+            progress = JSON.parse(prog);
+        }
+
+        if (nickname == "undefined") {
+            nickname = "";
+        } else {
+            nickname = JSON.parse(nickname);
+        }
+
+        if (maybetokenHashed === null) {
+            tokenHashed = "";
+        } else {
+            tokenHashed = maybetokenHashed;
         }
         loaded = true;
         if (import.meta.env.PROD) {
-            if (await validateToken(token)) {
-                let info = await getDoc(doc(usersRef, token));
-                window.localStorage.setItem("nickname", info.data()?.nickname);
-                window.localStorage.setItem("progress", JSON.stringify(info.data()?.progress));
-                nickname = info.data()?.nickname;
-                progress = info.data()?.progress;
-            } else {
-                window.localStorage.removeItem("token");
+            try {
+                let info = await getIfExist(tokenHashed);
+                window.localStorage.setItem("nickname", JSON.stringify(info.nickname));
+                window.localStorage.setItem("progress", JSON.stringify(info.progress));
+                nickname = info.nickname;
+                progress = info.progress;
+            } catch (e) {
+                console.error(e);
+                window.localStorage.removeItem("tokenHashed");
                 window.localStorage.removeItem("nickname");
                 window.localStorage.removeItem("progress");
+                tokenHashed = "";
+                nickname = "";
+                progress = {
+                    task: 0,
+                    section: 0
+                };
             }
         }
     });
 </script>
 
 <Navbar />
-{#if token !== "" || !loaded}
-    <div class="-z-10 opacity-0">
-        <Navbar realnav={false} />
-    </div>
-{/if}
-
-<Modal bind:showModal={showInfoCard}>
-    <div class="flex flex-col gap-3">
-        <h1 class="text-3xl">Thẻ thông tin của bạn</h1>
-        <p>
-            Bạn sẽ không cần xác minh danh tính lại trên trình duyệt này. Tuy nhiên, nếu bạn sử dụng
-            thiết bị khác, bạn sẽ cần thông tin này để đăng nhập.
-        </p>
-        <div class="flex flex-row items-center gap-3">
-            <svg
-                class="w-[50%]"
-                use:qr={{
-                    data: `https://butcuacotam.falcolabs.org/debai?token=${token}`,
-                    logo: logo,
-                    shape: "square"
-                }}
-            />
-            <div class="flex flex-col gap-3">
-                <p>Quét mã bên hoặc nhập thần chú sau để đăng nhập:</p>
-                <code>{toTextToken(token)}</code>
-            </div>
+<div class="h-full w-full">
+    {#if tokenHashed !== "" || !loaded}
+        <div class="-z-10 opacity-0">
+            <Navbar realnav={false} />
         </div>
-        <p>Đừng chia sẻ thần chú hay mã QR cho bất kỳ ai ngoài BTC.</p>
-
-        <p>
-            Bạn nên chụp màn hình tấm thẻ này. Ban Tổ chức có thể sẽ yêu cầu bạn cung cấp thần chú
-            khi trao giải. Mọi thắc mắc liên hệ BTC tại support@butcuacotam.cte.vn.
-        </p>
-        <br />
-    </div>
-</Modal>
-
-<main class="flex w-full min-w-screen flex-row">
-    {#if token === ""}
-        {#if !loaded}
-            <br /><br />
-            <p class="w-full text-center">Đang tải...</p>
-        {:else}
-            <div class="flex h-screen w-full min-w-screen flex-col items-center justify-center">
-                <h2 class="text-2xl">Nếu bạn lần đầu tới đây</h2>
-                <br />
-                <form
-                    class="flex flex-col"
-                    onsubmit={async () => {
-                        let toktuple = generateToken();
-                        await setDoc(doc(usersRef, toktuple.hash), {
-                            email: email,
-                            nickname: nickname,
-                            progress: {
-                                section: 0,
-                                task: 0
-                            }
-                        });
-                        token = toktuple.tokenAlnum;
-                        progress = {
-                            section: 0,
-                            task: 0
-                        };
-                        window.localStorage.setItem("token", toktuple.tokenAlnum);
-                        window.localStorage.setItem("nickname", nickname);
-                        window.localStorage.setItem(
-                            "progress",
-                            JSON.stringify({
-                                section: 0,
-                                task: 0
-                            })
-                        );
-                        showInfoCard = true;
-                    }}
-                >
-                    <input
-                        placeholder="Email của bạn"
-                        class="border-accent bg-bg outline-none"
-                        type="email"
-                        bind:value={email}
-                    />
-                    <input
-                        placeholder="Nickname bạn muốn"
-                        class="depth border-accent bg-bg outline-none"
-                        type="text"
-                        bind:value={nickname}
-                    />
-                    <button type="submit" class="btn w-full">Tiếp tục</button>
-                </form>
-                <br /><br />
-                <h2 class="text-2xl">hoặc nếu bạn cần làm tiếp</h2>
-                <br />
-                <div class="flex flex-row">
-                    <input
-                        placeholder="Nhập Thần chú của bạn"
-                        class="depth border-accent bg-bg outline-none"
-                        type="text"
-                        bind:value={tokenText}
-                    />
-                    <button
-                        class="btn"
-                        onclick={async () => {
-                            let alnum = toAlnumToken(tokenText.toLocaleUpperCase());
-                            if (await validateToken(alnum)) {
-                                let info = await getDoc(doc(usersRef, alnum));
-                                window.localStorage.setItem("token", computeHash(alnum));
-                                window.localStorage.setItem("nickname", info.data()?.nickname);
-                                window.localStorage.setItem(
-                                    "progress",
-                                    JSON.stringify(info.data()?.progress)
-                                );
-                                window.location.reload();
-                            } else {
-                                error = "Thần chú sai. Liên hệ BTC nếu bạn cần hỗ trợ.";
-                            }
-                        }}>Gửi</button
-                    >
-                </div>
-                <p class="max-w-[70%] text-center text-red-400">{error}</p>
-            </div>
-        {/if}
-    {:else}
-        <Competition
-            {token}
-            {nickname}
-            {progress}
-            {challenge}
-            triggerCard={() => {
-                showInfoCard = true;
-            }}
-        />
     {/if}
-</main>
+    <main class="flex h-full w-full flex-row">
+        {#if tokenHashed === ""}
+            {#if !loaded}
+                <br /><br />
+                <p class="w-full text-center">Đang tải...</p>
+            {:else}
+                <div class="flex h-screen w-full min-w-screen flex-col items-center justify-center">
+                    <h2 class="text-2xl">Nếu bạn lần đầu tới đây</h2>
+                    <br />
+                    <form
+                        class="flex flex-col"
+                        onsubmit={async () => {
+                            let toktuple = generateToken();
+                            await setDoc(doc(usersRef, toktuple.hash), {
+                                email: email,
+                                nickname: nickname,
+                                progress: {
+                                    section: 0,
+                                    task: 0
+                                }
+                            });
+                            tokenAlphanumeric = toktuple.tokenAlnum;
+                            tokenHashed = toktuple.hash;
+                            progress = {
+                                section: 0,
+                                task: 0
+                            };
+                            window.localStorage.setItem("tokenHashed", toktuple.hash);
+                            window.localStorage.setItem("nickname", JSON.stringify(nickname));
+                            window.localStorage.setItem(
+                                "progress",
+                                JSON.stringify({
+                                    section: 0,
+                                    task: 0
+                                })
+                            );
+                            acknowledged = false;
+                        }}
+                    >
+                        <input
+                            placeholder="Email của bạn"
+                            class="border-accent bg-bg outline-none"
+                            type="email"
+                            bind:value={email}
+                        />
+                        <input
+                            placeholder="Nickname bạn muốn"
+                            class="depth border-accent bg-bg outline-none"
+                            type="text"
+                            bind:value={nickname}
+                        />
+                        <button
+                            type="submit"
+                            class="btn w-full"
+                            data-backdrop="static"
+                            data-keyboard="false">Tiếp tục</button
+                        >
+                    </form>
+                    <br /><br />
+                    <h2 class="text-2xl">hoặc nếu bạn cần làm tiếp</h2>
+                    <br />
+                    <div class="flex flex-row">
+                        <input
+                            placeholder="Nhập Thần chú của bạn"
+                            class="depth border-accent bg-bg font-code outline-none"
+                            type="text"
+                            bind:value={tokenText}
+                        />
+                        <button
+                            class="btn"
+                            onclick={async () => {
+                                let alnum = toAlnumToken(tokenText.toLocaleUpperCase());
+                                try {
+                                    let info = await getIfExist(computeHash(alnum));
+                                    tokenHashed = computeHash(alnum);
+                                    nickname = info.nickname;
+                                    progress = info.progress;
+                                    window.localStorage.setItem("tokenHashed", tokenHashed);
+                                    window.localStorage.setItem(
+                                        "nickname",
+                                        JSON.stringify(info.nickname)
+                                    );
+                                    window.localStorage.setItem(
+                                        "progress",
+                                        JSON.stringify(info.progress)
+                                    );
+                                    // window.location.reload();
+                                } catch (e) {
+                                    error = `${e} Liên hệ BTC nếu bạn cần hỗ trợ.`;
+                                }
+                            }}>Gửi</button
+                        >
+                    </div>
+                    <br />
+                    <p class="max-w-[70%] text-center text-red-400">{error}</p>
+                </div>
+            {/if}
+        {:else if !acknowledged}
+            <div class="flex flex-col gap-3 p-6 md:p-12">
+                <h1 class="text-3xl">Thẻ xác minh bài làm</h1>
+                <p class="font-bold text-red-500">
+                    Đây là lần đầu tiên và là lần cuối cùng tấm thẻ này được hiển thị. Bạn nên chụp
+                    màn hình lại tấm thẻ này.
+                </p>
+                <p class="text-sm font-normal">
+                    Bạn sẽ không cần xác minh danh tính lại trên trình duyệt này. Tuy nhiên, nếu bạn
+                    sử dụng thiết bị khác, bạn sẽ cần thông tin này để đăng nhập.
+                </p>
+                <div class="flex flex-row items-center gap-3">
+                    <svg
+                        class="w-[50%]"
+                        use:qr={{
+                            data: `https://butcuacotam.falcolabs.org/debai?token=${tokenAlphanumeric}`,
+                            logo: logo,
+                            shape: "square"
+                        }}
+                    />
+                    <div class="flex flex-col gap-3">
+                        <p>Quét mã bên hoặc nhập thần chú sau để đăng nhập:</p>
+                        <code>{toTextToken(tokenAlphanumeric)}</code>
+                    </div>
+                </div>
+                <p class="text-sm font-normal">
+                    Đừng chia sẻ thần chú hay mã QR cho bất kỳ ai ngoài BTC.
+                </p>
 
-{#if token === ""}
+                <p class="text-sm font-normal">
+                    Ban Tổ chức sẽ yêu cầu bạn cung cấp thần chú khi trao giải. Ban Tổ chức không
+                    nắm giữ thần chú hay QR của bạn, chỉ có thể <a
+                        href="/bao-mat"
+                        class="text-accent">xác thực nó</a
+                    >. Mọi thắc mắc liên hệ BTC tại support@butcuacotam.cte.vn.
+                </p>
+                <button
+                    class="btn"
+                    onclick={() => {
+                        acknowledged = true;
+                    }}>Tiếp tục đến bài thi <ArrowRightIcon /></button
+                >
+                <br />
+            </div>
+        {:else}
+            <Competition {tokenHashed} {nickname} {progress} {challenge} />
+        {/if}
+    </main>
+</div>
+
+<!-- {#if tokenHashed === ""}
     <br />
 {:else}
     <footer>
         <Footer />
     </footer>
-{/if}
+{/if} -->
