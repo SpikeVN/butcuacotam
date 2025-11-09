@@ -6,10 +6,8 @@
     import { onMount } from "svelte";
     import { qr } from "@svelte-put/qr/svg";
     import Competition from "../../components/Competition.svelte";
-    import Modal from "../../components/Modal.svelte";
     import { page } from "$app/state";
     import logo from "$lib/assets/logo-large.png";
-    import Footer from "../../components/Footer.svelte";
     import { ArrowRightIcon } from "@lucide/svelte";
 
     let challenge: {
@@ -111,7 +109,7 @@ Bạn sẽ phải:
         }
         nickname = window.localStorage.getItem("nickname")!;
         let prog = window.localStorage.getItem("progress")!;
-        if (prog == "undefined") {
+        if (prog == "undefined" || prog == undefined || prog == null) {
             progress = {
                 task: 0,
                 section: 0
@@ -120,7 +118,7 @@ Bạn sẽ phải:
             progress = JSON.parse(prog);
         }
 
-        if (nickname == "undefined") {
+        if (nickname == "undefined" || nickname == undefined || nickname == null) {
             nickname = "";
         } else {
             nickname = JSON.parse(nickname);
@@ -168,99 +166,101 @@ Bạn sẽ phải:
                 <br /><br />
                 <p class="w-full text-center">Đang tải...</p>
             {:else}
-                <div class="flex h-screen w-full min-w-screen flex-col items-center justify-center">
-                    <h2 class="text-2xl">Nếu bạn lần đầu tới đây</h2>
-                    <br />
-                    <form
-                        class="flex flex-col"
-                        onsubmit={async () => {
-                            let toktuple = generateToken();
-                            await setDoc(doc(usersRef, toktuple.hash), {
-                                email: email,
-                                nickname: nickname,
-                                progress: {
+                <div
+                    class="flex h-screen w-full min-w-screen flex-col items-center justify-center gap-12"
+                >
+                    <div class="flex flex-col items-center gap-3">
+                        <h2 class="text-2xl">Nếu bạn lần đầu tới đây</h2>
+                        <form
+                            class="flex flex-col"
+                            onsubmit={async () => {
+                                let toktuple = generateToken();
+                                await setDoc(doc(usersRef, toktuple.hash), {
+                                    email: email,
+                                    nickname: nickname,
+                                    progress: {
+                                        section: 0,
+                                        task: 0
+                                    }
+                                });
+                                tokenAlphanumeric = toktuple.tokenAlnum;
+                                tokenHashed = toktuple.hash;
+                                progress = {
                                     section: 0,
                                     task: 0
-                                }
-                            });
-                            tokenAlphanumeric = toktuple.tokenAlnum;
-                            tokenHashed = toktuple.hash;
-                            progress = {
-                                section: 0,
-                                task: 0
-                            };
-                            window.localStorage.setItem("tokenHashed", toktuple.hash);
-                            window.localStorage.setItem("nickname", JSON.stringify(nickname));
-                            window.localStorage.setItem(
-                                "progress",
-                                JSON.stringify({
-                                    section: 0,
-                                    task: 0
-                                })
-                            );
-                            acknowledged = false;
-                        }}
-                    >
-                        <input
-                            placeholder="Email của bạn"
-                            class="border-accent bg-bg outline-none"
-                            type="email"
-                            bind:value={email}
-                        />
-                        <input
-                            placeholder="Nickname bạn muốn"
-                            class="depth border-accent bg-bg outline-none"
-                            type="text"
-                            bind:value={nickname}
-                        />
-                        <button
-                            type="submit"
-                            class="btn w-full"
-                            data-backdrop="static"
-                            data-keyboard="false">Tiếp tục</button
+                                };
+                                window.localStorage.setItem("tokenHashed", toktuple.hash);
+                                window.localStorage.setItem("nickname", JSON.stringify(nickname));
+                                window.localStorage.setItem(
+                                    "progress",
+                                    JSON.stringify({
+                                        section: 0,
+                                        task: 0
+                                    })
+                                );
+                                acknowledged = false;
+                            }}
                         >
-                    </form>
-                    <br /><br />
-                    <h2 class="text-2xl">hoặc nếu bạn cần làm tiếp</h2>
-                    <br />
-                    <div class="flex flex-row">
-                        <input
-                            placeholder="Nhập Thần chú của bạn"
-                            class="depth border-accent bg-bg font-code outline-none"
-                            type="text"
-                            bind:value={tokenText}
-                        />
-                        <button
-                            class="btn"
-                            onclick={async () => {
-                                let alnum = toAlnumToken(tokenText.toLocaleUpperCase());
-                                try {
-                                    let info = await getIfExist(computeHash(alnum));
-                                    tokenHashed = computeHash(alnum);
-                                    nickname = info.nickname;
-                                    progress = info.progress;
-                                    window.localStorage.setItem("tokenHashed", tokenHashed);
-                                    window.localStorage.setItem(
-                                        "nickname",
-                                        JSON.stringify(info.nickname)
-                                    );
-                                    window.localStorage.setItem(
-                                        "progress",
-                                        JSON.stringify(info.progress)
-                                    );
-                                    // window.location.reload();
-                                } catch (e) {
-                                    error = `${e} Liên hệ BTC nếu bạn cần hỗ trợ.`;
-                                }
-                            }}>Gửi</button
-                        >
+                            <input
+                                placeholder="Email của bạn"
+                                class="border-accent bg-bg outline-none"
+                                type="email"
+                                bind:value={email}
+                            />
+                            <input
+                                placeholder="Nickname bạn muốn"
+                                class="depth border-accent bg-bg outline-none"
+                                type="text"
+                                bind:value={nickname}
+                            />
+                            <button
+                                type="submit"
+                                class="btn w-full"
+                                data-backdrop="static"
+                                data-keyboard="false">Tiếp tục</button
+                            >
+                        </form>
                     </div>
-                    <br />
+                    <div class="flex flex-col items-center gap-3">
+                        <h2 class="text-2xl">hoặc nếu bạn cần làm tiếp</h2>
+                        <div class="flex flex-row">
+                            <input
+                                placeholder="Nhập Thần chú của bạn"
+                                class="depth border-accent bg-bg font-code outline-none"
+                                type="text"
+                                bind:value={tokenText}
+                            />
+                            <button
+                                class="btn"
+                                onclick={async () => {
+                                    let alnum = toAlnumToken(tokenText.toLocaleUpperCase());
+                                    try {
+                                        let info = await getIfExist(computeHash(alnum));
+                                        tokenHashed = computeHash(alnum);
+                                        nickname = info.nickname;
+                                        progress = info.progress;
+                                        window.localStorage.setItem("tokenHashed", tokenHashed);
+                                        window.localStorage.setItem(
+                                            "nickname",
+                                            JSON.stringify(info.nickname)
+                                        );
+                                        window.localStorage.setItem(
+                                            "progress",
+                                            JSON.stringify(info.progress)
+                                        );
+                                        // window.location.reload();
+                                    } catch (e) {
+                                        error = `${e} Liên hệ BTC nếu bạn cần hỗ trợ.`;
+                                    }
+                                }}>Gửi</button
+                            >
+                        </div>
+                    </div>
                     <p class="max-w-[70%] text-center text-red-400">{error}</p>
                 </div>
             {/if}
         {:else if !acknowledged}
-            <div class="flex flex-col gap-3 p-6 md:p-12">
+            <div class="flex flex-col gap-3 p-6 md:p-[20vw]">
                 <h1 class="text-3xl">Thẻ xác minh bài làm</h1>
                 <p class="font-bold text-red-500">
                     Đây là lần đầu tiên và là lần cuối cùng tấm thẻ này được hiển thị. Bạn nên chụp
