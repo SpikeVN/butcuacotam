@@ -116,7 +116,7 @@
             <img src={logoLarge} class="h-12 w-auto md:h-24" alt="logo cte" />
         </div>
     </div>
-
+    <!-- 
     <div class="flex flex-col items-center text-xl font-normal">
         <p class="font-semibold">Special Thanks</p>
         <div class="flex max-w-[70%] flex-row flex-wrap items-center justify-center gap-x-3">
@@ -131,7 +131,7 @@
             <p>Chị Vân Chi</p>
             <p>Anh Đức Phúc</p>
         </div>
-    </div>
+    </div> -->
 
     <div class="flex flex-col items-center text-xl font-normal">
         <p class="font-semibold" bind:this={disappearHookElement}>Thành viên Team 3</p>
@@ -141,12 +141,10 @@
             <p class="min-w-fit">Hoàng Việt</p>
             <p class="min-w-fit">Phương Vy</p>
             <p class="min-w-fit">Duy Hải</p>
-            <p class="min-w-fit">Dương Trung</p>
             <p class="min-w-fit">Trường Anh</p>
+            <p class="disappear min-w-fit" class:hidden={!suckhoe}>Dương Trung</p>
             <p class="disappear min-w-fit" class:hidden={!suckhoe}>Huyền My</p>
             <p class="disappear min-w-fit" class:hidden={!suckhoe}>Minh Khang</p>
-            <!-- <p class="min-w-fit">Huyền My</p> -->
-            <!-- <p class="min-w-fit">Huyền My</p> -->
         </div>
     </div>
 
